@@ -7,7 +7,7 @@ CONST = 0.5
 
 
 def greeting():
-    print('Привет, чем я могу помочь?')
+    print('Привет, разговоры прослушиваются, чем я могу помочь?')
     print('Вы можете выбрать разговор со мной, с оператором или хочешь оставить заявку о нарушении?')
     answer = input()
 
@@ -25,7 +25,7 @@ def faq(question):
     Обрабатывается входящий вопрос от пользователя и выбирается некоторое действие
     на основе определнных шаблонов
     Ссылка на реализацию:
-    https://
+    https://https://medium.com/deeppavlov/simple-intent-recognition-and-question-answering-with-deeppavlov-c54ccf5339a9
     """
     return question
 
@@ -35,7 +35,7 @@ def odqa_document():
     Функция хранит модель, которая позволяет ответить
     на вопрос пользователя (ответ находится в документе)
     ссылка на реализацию:
-    https://
+    https://https://medium.com/deeppavlov/open-domain-question-answering-with-deeppavlov-c665d2ee4d65
     """
     pass
 
@@ -73,14 +73,32 @@ if __name__ == '__main__':
     context = {}
     while dialog:
         question = input()
-        answer, threshold = faq(question)
+
+        '''
+        Допустим, мы определили, что сущетсвует N типов вопросов:
+        -1.. {общая информация, на которые есть готовые ответы}: 1.1. как проходит отбор, 1.2. информация о программе (тут может быть несколько состояний)
+        -2.. {предопределнные вопросы, на которые существуют готовые SQL-запросы}: 2.1. какие дворы участвуют в программе (тут может быть несколько состояний)
+        -3 участвет ли двор N в программе
+        -4 когда закончится обустройство во дворе N
+        -5 сколько лавочек во дворе N         
+        '''
+
+        raw_question, entity = ner(question)
+        answer_state, threshold = faq(raw_question)
         if threshold > CONST:  # Проверяем уверенность нейронной сети
-            print(answer)  # Проверяем ответ и переходим в соответсвующее состояние
-            if 'I-FAC' in ner(question):  # Выполняем соответсвующее дейсвтие
-                sql_query_to_base()
-            #    ...
+            state = answer_state  # Проверяем ответ и переходим в соответсвующее состояние
+            # Выполняем соответсвующее действие
+
+            if state == '1.1' or state == '1.2':
+                print('answer')
+            elif state == '2.1':
+                if not context and entity or context and entity:  # Если передали новую локацию - меняем контекст
+                    context['loc'] = entity
+                print(sql_query_to_base(context['loc']))  # Выполняем предопределнный запрос
+            #    ... и так далее с остальными
         else:
-            odqa_document()
+            # Иначе пытаемся найти вопрос в документах
+            odqa_document(question)
 
 
 
