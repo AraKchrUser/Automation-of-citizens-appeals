@@ -69,6 +69,8 @@ if __name__ == '__main__':
     else:
         dialog = True
 
+    # Будем создавать словарь с параметрами для хранения контекста
+    context = {}
     while dialog:
         question = input()
         answer, threshold = faq(question)
