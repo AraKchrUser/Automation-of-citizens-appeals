@@ -11,12 +11,7 @@ def greeting():
     print('Вы можете выбрать разговор со мной, с оператором или хочешь оставить заявку о нарушении?')
     answer = input()
 
-    if int(answer) == BOT:
-        return BOT
-    elif int(answer) == OPERATOR:
-        return OPERATOR
-    else:
-        return VIOLATION
+    return int(answer)
 
 
 def record():
@@ -25,18 +20,42 @@ def record():
 
 
 def faq(question):
+    """
+    Функция является по факту детектором намерений пользователя:
+    Обрабатывается входящий вопрос от пользователя и выбирается некоторое действие
+    на основе определнных шаблонов
+    Ссылка на реализацию:
+    https://
+    """
     return question
 
 
 def odqa_document():
+    """
+    Функция хранит модель, которая позволяет ответить
+    на вопрос пользователя (ответ находится в документе)
+    ссылка на реализацию:
+    https://
+    """
     pass
 
 
 def ner(question):
+    """
+    Функция извлекает улицу, номер дома и т.д.
+    и отбрасывает ее, оставляя суть вопроса для
+    дальнейшей классификации намерений (faq)
+    Реализация: кому как удобно - deeppavlov, natasha ...
+    """
     return question
 
 
 def sql_query_to_base():
+    """
+    Функция, вызывается при активации соответсвующего шаблона
+    в нее передаются сущности предметной области для выполнения запроса к БД
+    (пример: какие дворы участвуют в программе?)
+    """
     pass
 
 
@@ -50,13 +69,14 @@ if __name__ == '__main__':
     else:
         dialog = True
 
-    if dialog:
+    while dialog:
         question = input()
         answer, threshold = faq(question)
-        if threshold > CONST:
-            print(answer)
-        elif 'I-FAC' in ner(question):
-            sql_query_to_base()
+        if threshold > CONST:  # Проверяем уверенность нейронной сети
+            print(answer)  # Проверяем ответ и переходим в соответсвующее состояние
+            if 'I-FAC' in ner(question):  # Выполняем соответсвующее дейсвтие
+                sql_query_to_base()
+            #    ...
         else:
             odqa_document()
 
